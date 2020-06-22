@@ -209,6 +209,12 @@ Vagrant.configure("2") do |config|
 
         end
       end # If last machine
+
+      # Install Gremlin
+      if File.directory?(File.expand_path("./gremlin"))
+        v.vm.synced_folder './gremlin/', '/gremlin'
+      end
+      v.vm.provision :shell, :path => "install-gremlin.sh", :args => "#{name}", env: {"GREMLIN_TEAM_ID" => ENV['GREMLIN_TEAM_ID'], "GREMLIN_TEAM_SECRET" => ENV['GREMLIN_TEAM_SECRET']}
     end # machine configuration
   end # for each machine
 end

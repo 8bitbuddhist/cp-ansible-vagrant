@@ -1,0 +1,78 @@
+###################################
+# Profile: gremlin-demo
+#
+# - 2 Zookeepers
+# - 3 Brokers (1 w/ Schema Registry)
+# - 1 Kafka Connect Distributed
+# - 1 KSQL Server
+# - 1 Confluent Control Center (C3) and REST Proxy
+###################################
+
+zookeeper1:
+  memory: 1024
+  ports:
+    2181:
+  groups:
+    - preflight
+    - zookeeper
+zookeeper2:
+  memory: 1024
+  ports:
+    2181: 2182
+  groups:
+    - preflight
+    - zookeeper
+broker1:
+  memory: 1024
+  cpus: 1
+  ports:
+    9092:
+    8081:
+  groups:
+    - preflight
+    - broker
+    - schema-registry
+broker2:
+  memory: 1024
+  cpus: 1
+  ports:
+    9092: 9093
+  groups:
+    - preflight
+    - broker
+broker3:
+  memory: 1024
+  cpus: 1
+  ports:
+    9092: 9094
+  groups:
+    - preflight
+    - broker
+connect:
+  memory: 1024
+  ports:
+    8083:
+  groups:
+    - preflight
+    - connect-distributed
+ksql-server:
+  memory: 1024
+  cpus: 1
+  ports:
+    8088:
+  groups:
+    - preflight
+    - ksql
+  vars:
+    ksql_listener_port: 8088
+    ksql: '{"config": {"listeners": "http://0.0.0.0:8088"}}'
+controlcenter:
+  memory: 2048
+  cpus: 2
+  ports:
+    9021:
+    8082:
+  groups:
+    - preflight
+    - control-center
+    - kafka-rest

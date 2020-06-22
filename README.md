@@ -1,16 +1,38 @@
 # cp-ansible-vagrant
 
+Uses Vagrant and Ansible to provision a Kafka cluster. Also installs the [Gremlin](https://gremlin.com) daemon onto each node and registers it to the Gremlin Control Plane.
+
+## Setup
+
+### Step 1: Initialize cp-ansible submodule
+
 ```bash
-git clone git@github.com:cricket007/cp-ansible-vagrant.git
-cd cp-ansible-vagrant
-git submodule init && git submodule update --remote
+$ git submodule init && git submodule update --remote
 ```
 
-Using Vagrant to get up and running.
+### Step 2: Set your Gremlin environment variables
+
+Grab your Gremlin team ID and secret (or certificates) from the Gremlin web app. See the [Authentication docs](https://www.gremlin.com/docs/infrastructure-layer/authentication/) for more details.
+
+Set your team ID using:
+
+```bash
+$ export GREMLIN_TEAM_ID="your Gremlin team ID"
+```
+
+For secret-based authentication, set your team secret using:
+
+```bash
+$ export GREMLIN_TEAM_SECRET="your Gremlin secret"
+```
+
+For signature-based authentication, don't set `GREMLIN_TEAM_SECRET`. Instead, extract your certificate pair to a subfolder named `gremlin` and name your certificate and key files `gremlin.cert` and `gremlin.key` respectively.
+
+### Step 3: Set up Vagrant
 
 1) Install VirtualBox https://www.virtualbox.org/  
 2) Install Vagrant http://www.vagrantup.com/  
-3) Vagrant plugins  
+3) Install Vagrant plugins:  
 
 ```bash
 vagrant plugin install vagrant-hostmanager vagrant-vbguest
@@ -18,7 +40,14 @@ vagrant plugin install vagrant-hostmanager vagrant-vbguest
 vagrant plugin install vagrant-cachier # Caches & shares package downloads across VMs
 ```
 
-### Define the hosts
+### Step 4: Select a cluster configuration profile
+
+**Note:** This fork adds a demo profile called `gremlin-demo` designed specifically for running chaos experiments. To use it, run:
+
+```bash
+export CP_PROFILE=gremlin-demo
+```
+---
 
 Several profiles have already been defined in the `profiles/` directory.
 
@@ -29,6 +58,7 @@ All profiles have at least one broker and one zookeeper unless otherwise mention
 |Profile|Description|
 |-|-|
 |`kafka-1`||
+|`gremlin-demo`|<p><i>Requires at least 10 GB RAM</i><ul><li>2 ZooKeepers</li><li>3 Brokers</li><li>1 Schema Registry (on broker)</li><li>1 Distrubuted Kafka Connect Worker</li><li>1 KSQL Server</li><li>1 Confluent Control Center (C3)</li></ul>|
 |`kafka-cluster-3`|<ul><li>3 Zookeepers</li><li>3 Brokers</li></ul>|
 |`kafka-registry-ksql-1`|<ul><li>1 Schema Registry (on broker)</li><li>1 KSQL Server</li></ul>|
 |`kafka-registry-connect-1`|<ul><li>1 Schema Registry (on broker)</li><li>1 Distributed Kafka Connect Worker</li></ul>|
@@ -47,7 +77,7 @@ vagrant up
 
 New profiles can be added following the YAML format of the other profiles. If not specified, the default memory is `1536` (MB) and default CPU is `1`. If a port value mapping is not specified, it'll create a direct port forward to the host for the given key. The `vars` key will be assigned to the Ansible host variables.
 
-### Start Vagrant
+### Step 5: Start Vagrant
 
 By default, this starts up a `bento/centos-7` Vagrant box with `PLAINTEXT` security between all services.
 
